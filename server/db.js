@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { MONGODB_URI } from "./config";
+import { MONGODB_URI } from "./config.js";
 
 try {
   mongoose.set("strictQuery", true);
