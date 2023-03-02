@@ -6,6 +6,7 @@ import {
   updateEvaluation,
   deleteEvaluation
 } from "../controllers/evaluations.js";
+import { roleAuthorization, verifyToken } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -14,8 +15,20 @@ router.get("/", getEvaluations);
 router.get("/:evaluationId", getEvaluationById);
 
 /* MUTATIONS */
-router.post("/", createEvaluation);
-router.patch("/:evaluationId", updateEvaluation);
-router.delete("/:evaluationId", deleteEvaluation);
+router.post("/",
+  verifyToken,
+  roleAuthorization(['admin']),  
+  createEvaluation
+);
+router.patch("/:evaluationId", 
+  verifyToken, 
+  roleAuthorization(['admin']), 
+  updateEvaluation
+);
+router.delete("/:evaluationId",
+  verifyToken,
+  roleAuthorization(['admin']),
+  deleteEvaluation
+);
 
 export default router;

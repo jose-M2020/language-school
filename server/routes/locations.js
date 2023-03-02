@@ -6,6 +6,7 @@ import {
   updateLocation,
   deleteLocation
 } from "../controllers/locations.js";
+import { roleAuthorization, verifyToken } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -14,8 +15,20 @@ router.get("/", getLocations);
 router.get("/:locationId", getLocationById);
 
 /* MUTATIONS */
-router.post("/", createLocation);
-router.patch("/:locationId", updateLocation);
-router.delete("/:locationId", deleteLocation);
+router.post("/", 
+  verifyToken,
+  roleAuthorization(['admin']),
+  createLocation
+);
+router.patch("/:locationId", 
+  verifyToken, 
+  roleAuthorization(['admin']),
+  updateLocation
+);
+router.delete("/:locationId", 
+  verifyToken, 
+  roleAuthorization(['admin']),
+  deleteLocation
+);
 
 export default router;
