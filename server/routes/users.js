@@ -1,14 +1,31 @@
 import express from "express";
+import { 
+  getUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+  getCoursesByUser,
+  getCourseByUser,
+  addCourseToUser,
+  updateCourseByUser,
+  deleteCourseByUser
+} from "../controllers/users.js";
 
 const router = express.Router();
 
 /* QUERIES   */
-router.get("/", () => {greeting: 'hello'});
-router.get("/:id", () => {greeting: 'hello'});
+router.get("/", getUsers);
+router.get("/:userId", getUserById);
+
+router.get("/:userId/courses", getCoursesByUser);
+router.get("/:userId/courses", getCourseByUser);
 
 /* MUTATIONS */
-router.post("/", () => {greeting: 'hello'});
-router.put("/:id", () => {greeting: 'hello'});
-router.delete("/:id", () => {greeting: 'hello'});
+router.patch("/:userId", updateUser);
+router.delete("/:userId", deleteUser);
+
+router.post("/:userId/courses", addCourseToUser);
+router.patch("/:userId/courses/:courseId", updateCourseByUser);
+router.delete("/:userId/courses/:courseId", deleteCourseByUser);
 
 export default router;

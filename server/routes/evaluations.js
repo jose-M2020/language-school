@@ -1,14 +1,21 @@
 import express from "express";
+import { 
+  getEvaluations,
+  getEvaluationById,
+  createEvaluation,
+  updateEvaluation,
+  deleteEvaluation
+} from "../controllers/evaluations.js";
 
 const router = express.Router();
 
 /* QUERIES   */
-router.get("/", () => {greeting: 'hello'});
-router.get("/:id", () => {greeting: 'hello'});
+router.get("/", getEvaluations);
+router.get("/:evaluationId", getEvaluationById);
 
 /* MUTATIONS */
-router.post("/", () => {greeting: 'hello'});
-router.put("/:id", () => {greeting: 'hello'});
-router.delete("/:id", () => {greeting: 'hello'});
+router.post("/", createEvaluation);
+router.patch("/:evaluationId", updateEvaluation);
+router.delete("/:evaluationId", deleteEvaluation);
 
 export default router;

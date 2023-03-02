@@ -1,14 +1,21 @@
 import express from "express";
+import { 
+  getLocations,
+  getLocationById,
+  createLocation,
+  updateLocation,
+  deleteLocation
+} from "../controllers/locations.js";
 
 const router = express.Router();
 
 /* QUERIES   */
-router.get("/", () => {greeting: 'hello'});
-router.get("/:id", () => {greeting: 'hello'});
+router.get("/", getLocations);
+router.get("/:locationId", getLocationById);
 
 /* MUTATIONS */
-router.post("/", () => {greeting: 'hello'});
-router.put("/:id", () => {greeting: 'hello'});
-router.delete("/:id", () => {greeting: 'hello'});
+router.post("/", createLocation);
+router.patch("/:locationId", updateLocation);
+router.delete("/:locationId", deleteLocation);
 
 export default router;
