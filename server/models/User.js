@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'teacher', 'admin'],
+    enum: ['student', 'teacher', 'admin'],
     required: true
   },
   address: {
@@ -71,7 +71,7 @@ const UserSchema = new mongoose.Schema({
       }],
       currentModality: {
         type: String,
-        enum: ['remote', 'face-to-face'],
+        enum: ['Online', 'In-person'],
         required: true
       },
       currentLevel: {

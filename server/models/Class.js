@@ -6,21 +6,11 @@ const ClassSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  observation: { 
+  description: { 
     type: String
   },
-  reservedHours: { 
-    type: Number,
-    default: 1
-  },
-  date: { 
-    type: Date,
-    required: true
-  },
-  modality: {
-    type: String,
-    enum: ['remote', 'face-to-face'],
-    required: true
+  observation: { 
+    type: String
   },
   teacherId: { 
     type: Schema.ObjectId,
@@ -31,17 +21,7 @@ const ClassSchema = new mongoose.Schema({
     type: Schema.ObjectId,
     ref: 'Course',
     required: true
-  },
-  students: [
-    { 
-      userId: {
-        type: Schema.ObjectId,
-        ref: 'User',
-        required: true
-      },
-      attended: Boolean
-    }
-  ],
+  }
 }, { timestamps: true });
 
 export default mongoose.model("Class", ClassSchema);

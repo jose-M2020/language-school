@@ -10,6 +10,12 @@ import {
   updateCourseByUser,
   deleteCourseByUser
 } from "../controllers/users.js";
+import {
+  getReservationByUser,
+  createReservation,
+  updateReservation,
+  deleteReservation
+} from "../controllers/reservations.js";
 import { roleAuthorization, verifyToken } from "../middlewares/auth.js";
 
 const router = express.Router();
@@ -28,13 +34,18 @@ router.get("/:userId",
 
 router.get("/:userId/courses", 
   verifyToken, 
-  roleAuthorization(['admin', 'alumno']),
+  roleAuthorization(['admin', 'student']),
   getCoursesByUser
 );
-router.get("/:userId/courses",
+router.get("/:userId/courses/:courseId",
   verifyToken, 
-  roleAuthorization(['admin', 'alumno']),
+  roleAuthorization(['admin', 'student']),
   getCourseByUser
+);
+
+router.get("/:userId/reservations", 
+  verifyToken,
+  getReservationByUser
 );
 
 /* MUTATIONS */
@@ -63,6 +74,22 @@ router.delete("/:userId/courses/:courseId",
   verifyToken, 
   roleAuthorization(['admin']),
   deleteCourseByUser
+);
+
+router.post("/:userId/reservations",
+  verifyToken,
+  roleAuthorization(['student', 'admin']),
+  createReservation
+);
+router.patch("/:userId/reservations/:reservationId", 
+  verifyToken, 
+  roleAuthorization(['student','admin']),
+  updateReservation
+);
+router.delete("/:userId/reservations/:reservationId",
+  verifyToken, 
+  roleAuthorization(['admin']),
+  deleteReservation
 );
 
 export default router;

@@ -56,10 +56,7 @@ export const updateEvaluation = async (req, res) => {
       body: {
         name,
         description,
-        price,
-        discount,
-        modality,
-        levels
+        courseId
       },
       params: { evaluationId },
     } = req;
@@ -79,10 +76,7 @@ export const updateEvaluation = async (req, res) => {
         $set: {
           name,
           description,
-          price,
-          discount,
-          modality,
-          levels
+          courseId
         },
       },
       { new: true }
@@ -107,7 +101,7 @@ export const deleteEvaluation = async (req, res) => {
     const deletedEvaluation = await Evaluation.findByIdAndDelete(evaluationId);
 
     if (!deletedEvaluation) {
-      const error = new Error("Evaluation doesn't exists");
+      const error = new Error("Evaluation doesn't exist");
       error.status = 404;
       throw error;
     }

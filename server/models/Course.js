@@ -18,7 +18,7 @@ const CourseSchema = new mongoose.Schema({
   },
   modality: {
     type: [String],
-    enum: ['remote', 'face-to-face'],
+    enum: ['Online', 'In-person'],
     required: true
   },
   levels: [{

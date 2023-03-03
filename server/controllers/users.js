@@ -29,7 +29,7 @@ export const getCoursesByUser = async (req, res) => {
     const { userId } = req.params;
     const user = await User.findById(userId, 'courses');
     
-    res.status(201).json(user);
+    res.status(201).json(user.courses);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -37,8 +37,18 @@ export const getCoursesByUser = async (req, res) => {
 
 export const getCourseByUser = async (req, res) => {
   try {
+    const { userId, courseId } = req.params;
+
+    const course =  await User.findOne(
+      {_id: userId},
+      {courses: {
+        '$elemMatch': {
+          _id: courseId
+        }
+      }}
+    )
     
-    res.status(201).json({});
+    res.status(201).json(course.courses[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

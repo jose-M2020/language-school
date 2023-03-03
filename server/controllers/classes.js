@@ -1,24 +1,28 @@
+import Class from "../models/Class.js";
 import Course from "../models/Course.js";
-import Location from "../models/Location.js";
 
 /* QUERIES   */
 
-// TODO: Change all of these
-
-export const getLocations = async (req, res) => {
+export const getClasses = async (req, res) => {
   try {
-    const locations = await Location.find();
-    res.status(201).json(locations);
+    const classes = await Class.find();
+    res.status(201).json(classes);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-export const getLocationById = async (req, res) => {
+export const getClassById = async (req, res) => {
   try {
-    const { locationId } = req.params;
-    const location = await Location.findById(locationId);
-    res.status(201).json(location);
+    const { classId } = req.params;
+    const schoolClass = await Class.findById(classId);
+    
+    if (!schoolClass) {
+      return res.status(404)
+                .json({error: "Class doesn't exist"})
+    }
+
+    res.status(201).json(schoolClass);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -26,13 +30,13 @@ export const getLocationById = async (req, res) => {
 
 /* MUTATIONS */
 
-export const createLocation = async (req, res) => {
+export const createClass = async (req, res) => {
   try {
     const {
-      country,
-      state,
-      city,
-      postalCode,
+      topic,
+      description,
+      observation,
+      teacherId,
       courseId
     } = req.body;
     
@@ -41,79 +45,77 @@ export const createLocation = async (req, res) => {
     // if (!courseExists)
     //   return res.status(400).json({ error: "Course doesn't exist" });
 
-    const newLocation = new Location({
-      country,
-      state,
-      city,
-      postalCode,
+    const newClass = new Class({
+      topic,
+      description,
+      observation,
+      teacherId,
       courseId
     });
-    const savedLocation = await newLocation.save();
+    const savedClass = await newClass.save();
 
-    res.status(201).json(savedLocation);
+    res.status(201).json(savedClass);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-export const updateLocation = async (req, res) => {
+export const updateClass = async (req, res) => {
   try {
     const {
       body: {
-        country,
-        state,
-        city,
-        postalCode,
+        topic,
+        description,
+        observation,
+        teacherId,
         courseId
       },
-      params: { locationId },
+      params: { classId },
     } = req;
     
-    if (!locationId) {
+    if (!classId) {
       res
         .status(400)
         .send({
           status: "FAILED",
-          data: { error: "Parameter locationId can not be empty" },
+          data: { error: "Parameter classId can not be empty" },
         });
     }
     
-    const updatedLocation = await Location.findByIdAndUpdate(
-      locationId,
+    const updatedClass = await Class.findByIdAndUpdate(
+      classId,
       {
         $set: {
-          country,
-          state,
-          city,
-          postalCode,
+          topic,
+          description,
+          observation,
+          teacherId,
           courseId
         },
       },
       { new: true }
     );
-      
-    if (!updatedLocation) {
-      const error = new Error("Location doesn't exist");
-      error.status = 404;
-      throw error;
+
+    if (!updatedClass) {
+      return res.status(404)
+                .json({error: "Class doesn't exist"})
     }
 
-    res.status(201).json(updatedLocation);
+    res.status(201).json(updatedClass);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-export const deleteLocation = async (req, res) => {
+export const deleteClass = async (req, res) => {
   try {
-    const { locationId } = req.params;
+    const { classId } = req.params;
 
-    const deletedEvaluation = await Location.findByIdAndDelete(locationId);
+    const deletedClass = await Class.findByIdAndDelete(classId);
 
-    if (!deletedEvaluation) {
-      const error = new Error("Location doesn't exist");
-      error.status = 404;
-      throw error;
+    if (!deletedClass) {
+      return res.status(404)
+                .json({error: "Class doesn't exist"})
     }
 
     res.sendStatus(204);
