@@ -7,3 +7,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+main {
+  width: 100%;
+}
+
+.fc .fc-timegrid-slots table tr {
+  padding: 2px 4px;
+  height: 100px;
+} 
+
+.fc .fc-timegrid-cols .fc-event-main {
+  padding: 10px;
+} 

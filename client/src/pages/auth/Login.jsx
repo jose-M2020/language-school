@@ -10,6 +10,7 @@ import useAxios from '../../hooks/useAxios';
 import { POST } from '../../services/Api';
 import { tokens } from '../../theme';
 import { setLogin } from '../../state';
+import { useEffect } from 'react';
 
 const schema = yup.object().shape({
   email: yup.string().email("invalid email").required("required"),
@@ -27,9 +28,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const colors = tokens();
 
-  const onSubmit = async (values, onSubmitProps) => {
-    execute(values);
-    onSubmitProps.resetForm();
+  useEffect(() => {
     if (data) {
       dispatch(
         setLogin({
@@ -37,8 +36,19 @@ const Login = () => {
           token: data.token,
         })
       );
+
+      navigate("/dashboard");
     }
-    navigate("/dashboard");
+  }, [data]);
+
+  const onSubmit = (values, onSubmitProps) => {
+    execute(values);
+
+    // if (!data) {
+    //   return
+    // }
+    // onSubmitProps.resetForm();
+    
   };
 
   return (
@@ -47,22 +57,14 @@ const Login = () => {
       initialValues={initialValues}
       validationSchema={schema}
     >
-      {({
-        values,
-        errors,
-        touched,
-        handleBlur,
-        handleChange,
-        handleSubmit,
-        setFieldValue,
-        resetForm,
-      }) => (
+      {({ handleSubmit }) => (
         <form onSubmit={handleSubmit}>
           <Box
             display="flex"
             alignItems="center"
             justifyContent="center"
             minHeight='100vh'
+            sx={{ backgroundColor: colors.primary}}
           >
             <Stack spacing={1}
               sx={{

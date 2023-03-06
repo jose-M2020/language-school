@@ -15,14 +15,13 @@ const useAxios = ({url, method, ...params}, executeOnMount = true) => {
   const execute = async (payload) => {
     try {
       setLoading(true);
-      
       const response = await axios.request({
         data: payload,
         signal: controllerRef.current.signal,
         method,
         url
       });
-
+      
       setData(response.data);
     } catch (error) {
       setError(error.message);

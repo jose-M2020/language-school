@@ -4,8 +4,8 @@ import { createTheme } from "@mui/material/styles";
 // color design tokens export
 export const tokens = () => ({
   primary: '#112E40',
-  secondary: '#41D992',
-  blueAccent: '#4BA695',
+  secondary: '#d4d7ef',
+  greenAccent: '#8ef7c5',
   white: '#F1F8FC'
 });
 
@@ -27,7 +27,7 @@ export const themeSettings = () => {
       //   light: colors.grey[100],
       // },
       background: {
-        default: colors.primary,
+        default: colors.white,
       }
     },
     typography: {
