@@ -48,29 +48,17 @@ export const getReservationByUser = async (req, res) => {
 
 export const createReservation = async (req, res) => {
   try {
-    const {
-      classId,
-      studentId,
-      reservedHours,
-      date,
-      modality
-    } = req.body;
+    const { body } = req;
     
     // const reservationExists = await Reservation.findById(reservationId);
     
     // if (!reservationExists)
     //   return res.status(400).json({ error: "Reservation doesn't exist" });
+    
+    const newReservations = Reservation.insertMany(body);
+    // const savedReservation = await newReservation.save();
 
-    const newReservation = new Reservation({
-      studentId,
-      reservedHours,
-      date,
-      modality,
-      status: 'pending'
-    });
-    const savedReservation = await newReservation.save();
-
-    res.status(201).json(savedReservation);
+    res.status(201).json(newReservations);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -34,7 +34,7 @@ export const reservationsApi = createApi({
     createReservation: builder.mutation({
       query: (data) => {
         const {userId, payload} = data;
-        console.log(payload)
+        
         return {
           url: `/users/${userId}/reservations`,
           method: "POST",
@@ -44,10 +44,10 @@ export const reservationsApi = createApi({
       invalidatesTags: ["Reservations"],
     }),
     updateReservation: builder.mutation({
-      query: (updatedReservation) => ({
-        url: `/reservations/${updatedReservation.id}`,
+      query: ({data, payload}) => ({
+        url: `/users/${data.userId}/reservations/${data.reservationId}`,
         method: "PATCH",
-        body: updatedReservation,
+        body: payload,
       }),
       invalidatesTags: ["Reservations"],
     }),

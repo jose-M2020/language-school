@@ -49,15 +49,15 @@ const CustomButton = ({
         boxShadow: `0 0 8px ${colors.secondary}`,
       },
     },
-    // danger: {
-    //   ...mainStyles,
-    //   backgroundColor: colors.redAccent[500],
-    //   color: '#e0e0e0',
-    //   '&:hover': {
-    //     backgroundColor: colors.redAccent[600],
-    //     boxShadow: `0 0 8px ${colors.redAccent[600]}`,
-    //   },
-    // }
+    danger: {
+      ...mainStyles,
+      backgroundColor: colors.redAccent,
+      color: '#e0e0e0',
+      '&:hover': {
+        backgroundColor: colors.redAccent,
+        boxShadow: `0 0 8px ${colors.redAccent}`,
+      },
+    }
   }
   
   return (

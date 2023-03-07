@@ -14,9 +14,9 @@ import DashboardLayout from '../../layouts/Dashboard'
 import CustomButton from '../../components/CustomButton'
 import CustomModal from '../../components/CustomModal'
 import { tokens } from '../../theme';
-import { hoursDiff, reservationStatus } from '../../helpers';
+import { hoursDiff } from '../../helpers';
 import { useCreateReservationMutation, useGetReservationsQuery, useUpdateReservationMutation } from '../../redux/api/reservationApi';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 // TODO: 
   // 1.- Disabled the selection of ceills to book a class
@@ -75,59 +75,112 @@ const Schedule = () => {
   const selectedReservations = [];
   
   const limitHoursPerWeek = 8
-  const [modal, setModal] = useState(false)
-  const [currentEvent, setcurrentEvent] = useState({})
-  const dispatch = useDispatch();
-
+  // const [modal, setModal] = useState(false)
+    
   useEffect(() => {
     setTimeout(() => {
       setCanBook(true)
     }, 1000);
   }, [])
+  console.log(reservations)
+  // FullCalendar Functions
 
   const renderEventContent = (eventInfo) => {
     const {
       timeText,
       event: {extendedProps: {
+        _id,
+        status,
         topic,
         teacher,
-        status
+        classroom
       }}
     } = eventInfo;
-
     const canCancel = status === 'pending' || status === 'confirmed';
-
+    
     return (
-      <Stack sx={{cursor: 'pointer'}}>
-        <Typography variant='span' fontWeight='bold'>{timeText}</Typography>
-        <Typography noWrap={true}>Topic: {topic}</Typography>
-        <Typography noWrap={true}>Teacher: {teacher}</Typography>
-        {/* {eventInfo.event.id === 'wait' && } */}
-        {
-          canCancel && (
-            <CustomButton 
-              text='Cancel'
-              btnstyle='secondary'
-              size='sm'
-              mt={7}
-            />
-          )
-        }
-        {/* {
-          !canCancel && (
-            <Typography>{status}</Typography>
-          )
-        } */}
-        <Chip label={status} />
-      </Stack>
+      (status ? (
+        <Stack 
+          sx={{
+            position: 'relative',
+            padding: '7px',
+            '&:hover .dialog': {
+                display: 'block',
+              }
+          }}>
+          <Typography variant='span' fontWeight='bold'>{timeText}</Typography>
+          <Typography noWrap={true}>Topic: {topic}</Typography>
+          <Typography noWrap={true}>Teacher: {teacher}</Typography>
+          {/* {eventInfo.event.id === 'wait' && } */}
+          {
+            canCancel && (
+              <CustomButton
+                id={_id}
+                text='Cancel'
+                btnstyle='danger'
+                size='sm'
+                mt={7}
+                onClick={() => handleChangeReservation(_id)}
+              />
+            )
+          }
+
+          {(status !== 'processing' && (
+            <Stack 
+              className='dialog'
+              spacing='6px' 
+              sx={{ 
+                display: 'none',
+                padding: '10px',
+                background: '#ecf1f4',
+                boxShadow: '0 0 6px #817d7d',
+                borderRadius: '6px',
+                color: colors.primary,
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                width: '200px',
+                zIndex: 1000000
+              }}
+            >
+              <Box display='flex' alignItems='center'>
+                <Box
+                  sx={{
+                    width: '13px',
+                    height: '13px',
+                    borderRadius: '50%',
+                    backgroundColor: colors.primary,
+                    mr: '8px'
+                  }}  
+                ></Box>
+                <Typography 
+                  variant='span'
+                >{ status }</Typography>
+              </Box>
+              <Typography fontSize='1.5rem' fontWeight='bold'>{ timeText }</Typography>
+              <Stack spacing='3px'>
+                <Typography sx={{ overflowWrap: 'break-word' }}>Topic: { topic }</Typography>
+                <Typography sx={{ overflowWrap: 'break-word' }}>Teacher: { teacher }</Typography>
+                <Typography sx={{ overflowWrap: 'break-word' }}>Classroom: { classroom }</Typography>
+              </Stack>
+            </Stack>
+          ))}
+        </Stack>
+      ): (
+        <Box bgcolor='#dae4e9'></Box>
+      ))
     )
   }
 
   const handleDateClick = (selected) =>{
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
-    
-    if((reservations?.length + selectedReservations?.length) >= limitHoursPerWeek){
+
+    const filteredItems = reservations.filter(item => (
+      item.status !== 'cancelled'
+    ))
+
+    if((filteredItems?.length + selectedReservations?.length) >= limitHoursPerWeek){
       return toast.info("You've exceeded the limit of hours per week!");
     }
     if(
@@ -137,11 +190,7 @@ const Schedule = () => {
       return;
     }
 
-    selectedReservations.push({
-      date: selected.startStr,
-      studentId: userId,
-      modality: 'In-person'
-    });
+    selectedReservations.push(selected);
     
     calendarApi.addEvent({
       start: selected.startStr,
@@ -156,39 +205,55 @@ const Schedule = () => {
       startStr,
       extendedProps: { status },
     } = selectedEvent.event;
-
+    
     if(status === 'processing'){
       const index = selectedReservations.findIndex(item => (
-        item.date === startStr
+        item.startStr === startStr
       ));
 
       const removedItem = index > -1 && selectedReservations.splice(index, 1);
       if(removedItem?.length) selectedEvent.event.remove()   
     }
-    if(status !== 'processing'){
-      setcurrentEvent(selectedEvent.event);
-      setModal(true);
-    }
   }
+
+  // Api Calls
 
   const handleAddReservations = async () => {
     if(!selectedReservations.length){
       return toast.error('Select at least one reservation');
     }
 
-    setCanBook(false);
+    const payload = selectedReservations.map(item => {
+      // item.event.remove();
+      const calendarApi = item.view.calendar;
+      console.log(calendarApi)
+      return {
+        date: item.startStr,
+        studentId: userId,
+        modality: 'In-person'
+      }
+    })
 
-    await dispatch(createReservation({
-      userId,
-      payload: selectedReservations
-    }))
 
-    toast.success('Reservation added successfully!');
-    setCanBook(true);
+
+    // console.log(payload);
+
+    // setCanBook(false);
+
+    // await createReservation({
+    //   userId,
+    //   payload: selectedReservations
+    // })
+    
+    // toast.success('Reservation added successfully!');
+    // setCanBook(true);
   }
   
-  const handleUpdateReservation = async () => {
-    
+  const handleChangeReservation = (id) => {
+    updateReservation({
+      data: {userId, reservationId: id},
+      payload: {status: 'cancelled'}
+    })
   }
 
   return (
@@ -249,13 +314,15 @@ const Schedule = () => {
             >Getting reservations...</Typography>
           )}
         </Box>
-      
-      <CustomModal
+
+      {/* <CustomModal
         title='Booking details'
         open={modal}
         handleClose={() => setModal(!modal)}
-      >
-        <List sx={{ width: '100%', maxWidth: 360 }}>
+      > */}
+        
+
+        {/* <List sx={{ width: '100%', maxWidth: 360 }}>
           <ListItem disableGutters>
             <ListItemAvatar>
               <Avatar>
@@ -280,8 +347,8 @@ const Schedule = () => {
             </ListItemAvatar>
             <ListItemText primary="Classroom" secondary="July 20, 2014" />
           </ListItem>
-        </List>
-      </CustomModal>
+        </List> */}
+      {/* </CustomModal> */}
     </DashboardLayout>
   )
 }

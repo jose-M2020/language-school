@@ -13,9 +13,9 @@ main {
 
 .fc .fc-timegrid-slots table tr {
   padding: 2px 4px;
-  height: 100px;
+  height: 105px;
 } 
 
-.fc .fc-timegrid-cols .fc-event-main {
-  padding: 10px;
+.fc .fc-timegrid-cols .fc-timegrid-event-harness {
+  z-index: -1 !important;
 } 

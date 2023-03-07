@@ -6,7 +6,8 @@ export const tokens = () => ({
   primary: '#112E40',
   secondary: '#d4d7ef',
   greenAccent: '#8ef7c5',
-  white: '#F1F8FC'
+  white: '#F1F8FC',
+  redAccent: '#e86464'
 });
 
 // mui theme settings
@@ -14,7 +15,6 @@ export const themeSettings = () => {
   const colors = tokens();
   return {
     palette: {
-      // palette values for dark mode
       primary: {
         main: colors.primary,
       },
