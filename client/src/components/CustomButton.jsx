@@ -2,7 +2,14 @@ import { Button, CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { tokens } from '../theme';
 
-const CustomButton = ({text, link, loading = false, size = 'md' , ...props}) => {
+const CustomButton = ({
+  text,
+  link,
+  loading = false,
+  btnstyle = 'primary',
+  size = 'md',
+  ...props
+}) => {
   const colors = tokens();
 
   const sizes = {
@@ -55,7 +62,7 @@ const CustomButton = ({text, link, loading = false, size = 'md' , ...props}) => 
   
   return (
     <Button
-      sx={styles[props.btnstyle]}
+      sx={styles[btnstyle]}
       {...props}
       {...(loading) && {
         disabled: true,

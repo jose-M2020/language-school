@@ -1,16 +1,22 @@
-import React from 'react'
+import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list";
-import { Box, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Chip, List, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material'
+import FilePresentIcon from '@mui/icons-material/FilePresent';
+import PersonIcon from '@mui/icons-material/Person';
+import DomainIcon from '@mui/icons-material/Domain';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import DashboardLayout from '../../layouts/Dashboard'
-import CutomButtom from '../../components/CustomButton'
-import { useState } from 'react';
-import { useEffect } from 'react';
+import CustomButton from '../../components/CustomButton'
+import CustomModal from '../../components/CustomModal'
 import { tokens } from '../../theme';
 import { hoursDiff, reservationStatus } from '../../helpers';
+import { useGetReservationsQuery } from '../../redux/api/reservationApi';
+import { useSelector } from 'react-redux';
 
 // TODO: 
   // 1.- Disabled the selection of ceills to book a class
@@ -21,43 +27,56 @@ import { hoursDiff, reservationStatus } from '../../helpers';
 
   // TODO:Add status field to the schema model in mongoose, to check if the class is available or reservation
 
+const colors = tokens()
+// const reservations = [
+//   {
+//     id: "12315",
+//     status: 'cancelled',
+//     topic: 'Verbs in present simple',
+//     teacher: 'Jhonne',
+//     date: "2023-03-07T09:00:00-06:00",
+//     color: reservationStatus('cancelled').color,
+//     textColor: colors.primary
+//   },
+//   {
+//     id: "12315",
+//     status: 'attended',
+//     topic: 'Verbs in past simple',
+//     teacher: 'Jhonne',
+//     date: "2023-03-07T12:00:00-06:00",
+//     color: reservationStatus('attended').color
+//   },
+//   {
+//     id: "5123",
+//     status: 'confirmed',
+//     topic: 'Verbs in present perfect',
+//     teacher: 'Jhonne',
+//     date: "2023-03-07T14:00:00-06:00",
+//     color: reservationStatus('confirmed').color
+//   },
+// ];
+
+const allowedDates = [
+  "2023-03-04T07:00:00-06:00",
+  "2023-03-04T08:00:00-06:00",
+  "2023-03-04T09:00:00-06:00",
+  "2023-03-04T10:00:00-06:00",
+  "2023-03-04T11:00:00-06:00",
+]
 
 const Schedule = () => {
+  const userId = useSelector((state) => state.auth.user._id);
+  const { data: reservations = [], isLoading, isError, error } = useGetReservationsQuery(userId);
+  
+  console.log(reservations);
+  
   const [canBook, setCanBook] = useState(false);
-  const colors = tokens()
-  const selectedDates = [];
-  const reservations = [
-    {
-      id: "12315",
-      title: "Reservation",
-      status: 'cancelled',
-      date: "2023-03-07T09:00:00-06:00",
-      color: reservationStatus('cancelled').color,
-      textColor: colors.primary
-    },
-    {
-      id: "12315",
-      title: "Reservation",
-      status: 'attended',
-      date: "2023-03-07T12:00:00-06:00",
-      color: reservationStatus('attended').color
-    },
-    {
-      id: "5123",
-      title: "Reservation",
-      status: 'confirmed',
-      date: "2023-03-07T14:00:00-06:00",
-      color: reservationStatus('confirmed').color
-    },
-  ];
-
-  const allowedDates = [
-    "2023-03-04T07:00:00-06:00",
-    "2023-03-04T08:00:00-06:00",
-    "2023-03-04T09:00:00-06:00",
-    "2023-03-04T10:00:00-06:00",
-    "2023-03-04T11:00:00-06:00",
-  ]
+  
+  const selectedReservations = [];
+  
+  const limitHoursPerWeek = 8
+  const [modal, setModal] = useState(false)
+  const [currentEvent, setcurrentEvent] = useState({})
 
   useEffect(() => {
     setTimeout(() => {
@@ -68,35 +87,37 @@ const Schedule = () => {
   const renderEventContent = (eventInfo) => {
     const {
       timeText,
-      event: {title},
       event: {extendedProps: {
+        topic,
+        teacher,
         status
       }}
     } = eventInfo;
 
-    console.log(eventInfo.event.extendedProps.status)
-
     const canCancel = status === 'pending' || status === 'confirmed';
 
     return (
-      <Stack spacing={1}>
+      <Stack sx={{cursor: 'pointer'}}>
         <Typography variant='span' fontWeight='bold'>{timeText}</Typography>
-        <Typography variant='span'>{title}</Typography>
+        <Typography noWrap={true}>Topic: {topic}</Typography>
+        <Typography noWrap={true}>Teacher: {teacher}</Typography>
         {/* {eventInfo.event.id === 'wait' && } */}
         {
           canCancel && (
-            <CutomButtom 
+            <CustomButton 
               text='Cancel'
               btnstyle='secondary'
               size='sm'
+              mt={7}
             />
           )
         }
-        {
+        {/* {
           !canCancel && (
             <Typography>{status}</Typography>
           )
-        }
+        } */}
+        <Chip label={status} />
       </Stack>
     )
   }
@@ -104,36 +125,59 @@ const Schedule = () => {
   const handleDateClick = (selected) =>{
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
-
-    console.log(calendarApi.getEvents())
-
-
-
-    if(reservations.some(item => item.date === selected.startStr)){
-      alert('Date has already been selected');
+    
+    if((reservations?.length + selectedReservations?.length) >= limitHoursPerWeek){
+      return toast.info("You've exceeded the limit of hours per week!");
+    }
+    if(
+      reservations?.some(item => item.date === selected.startStr) ||
+      selectedReservations?.some(item => item.date === selected.startStr)
+    ){
       return;
     }
-    if(!selectedDates.includes(selected.startStr)){
-      selectedDates.push(selected.startStr);
-      calendarApi.addEvent({
-        id: 'wait',
-        title: 'Waiting',
-        start: selected.startStr,
-        status: 'pending',
-        color: reservationStatus('pending').color,
-        textColor: colors.secondary
-      });
-    }
 
-    console.log(selected)
+    selectedReservations.push({
+      date: selected.startStr,
+      studentId: 'wjh3jb434jb3j4bj',
+      modality: 'In-person'
+    });
+    
+    calendarApi.addEvent({
+      start: selected.startStr,
+      status: 'processing',
+      color: '#dae4e9',
+      textColor: colors.primary,
+    });
   }
 
-  const handleEventClick = (event) => {
-    console.log(event)
+  const handleEventClick = (selectedEvent) => {
+    const {
+      startStr,
+      extendedProps: { status },
+    } = selectedEvent.event;
+
+    if(status === 'processing'){
+      const index = selectedReservations.findIndex(item => (
+        item.date === startStr
+      ));
+
+      const removedItem = index > -1 && selectedReservations.splice(index, 1);
+      if(removedItem?.length) selectedEvent.event.remove()   
+    }
+    if(status !== 'processing'){
+      setcurrentEvent(selectedEvent.event);
+      setModal(true);
+    }
+  }
+
+  const handleReservations = () => {
+    console.log(selectedReservations)
   }
 
   return (
     <DashboardLayout>
+        <CustomButton text='Book classes' onClick={handleReservations}></CustomButton>
+        <ToastContainer />
         <Box>
             <FullCalendar
               height="75vh"
@@ -163,21 +207,54 @@ const Schedule = () => {
                 }
                 return allowedDates.includes(selectInfo.startStr) ? false : true
               }}
-              eventaft
               initialView="timeGridWeek"
               editable={false}
               selectable={true}
               selectMirror={true}
-              dayMaxEvents={2}
+              dayMaxEvents={1}
               select={handleDateClick}
               eventClick={handleEventClick}
               eventContent={renderEventContent}
+              longPressDelay={1}
             //   initialEvents={data?.events.map(({_id, ...props}) => (
               initialEvents={reservations}
                 // {id: _id, ...props}
             //   ))}
             />
           </Box>
+      
+      <CustomModal
+        title='Booking details'
+        open={modal}
+        handleClose={() => setModal(!modal)}
+      >
+        <List sx={{ width: '100%', maxWidth: 360 }}>
+          <ListItem disableGutters>
+            <ListItemAvatar>
+              <Avatar>
+                <FilePresentIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Topic" secondary="Jan 9, 2014" />
+          </ListItem>
+          <ListItem disableGutters>
+            <ListItemAvatar>
+              <Avatar>
+                <PersonIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Teacher" secondary="Jan 7, 2014" />
+          </ListItem>
+          <ListItem disableGutters>
+            <ListItemAvatar>
+              <Avatar>
+                <DomainIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Classroom" secondary="July 20, 2014" />
+          </ListItem>
+        </List>
+      </CustomModal>
     </DashboardLayout>
   )
 }

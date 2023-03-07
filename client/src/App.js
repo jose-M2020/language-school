@@ -9,8 +9,10 @@ import Schedule from './pages/Schedule';
 
 function App() {
   const theme = useMode();
-  const isAuth = Boolean(useSelector((state) => state.token));
-
+  const isAuth = Boolean(
+    useSelector((state) => state.auth.token)
+  );
+  
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
-import { Avatar, Box, IconButton, Typography, useMediaQuery } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Avatar, Box, Divider, IconButton, Typography, useMediaQuery } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 // import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -10,8 +10,11 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
 import { hexToRgba } from "../../../helpers";
+import { useDispatch } from "react-redux";
+import { setLogout } from "../../../redux/features/authSlice";
 
 const colors = tokens();
 
@@ -32,9 +35,11 @@ const Item = ({ title, to, icon, selected, setSelected, ...props }) => {
 
 
 const Sidebar = () => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState("Dashboard");
   const { collapseSidebar, collapsed } = useProSidebar();
   const isMobil = useMediaQuery('(max-width:600px)');
+  const dispatch = useDispatch()
 
   const menuItemStyles = {
     // root: {
@@ -65,6 +70,11 @@ const Sidebar = () => {
     // }),
   };
 
+  const handleLogout = () =>{
+    dispatch(setLogout());
+    navigate('login');
+  }
+
   return (
     <Box
       sx={{
@@ -81,7 +91,8 @@ const Sidebar = () => {
         image='bg.svg'
         rootStyles={{
           border: 'none',
-          color: colors.white
+          color: colors.white,
+          position: 'relative'
         }}
       >
         <Menu iconShape="square" menuItemStyles={menuItemStyles}>
@@ -165,6 +176,13 @@ const Sidebar = () => {
                 setSelected={setSelected}                
               />
             <Item
+              title="Courses"
+              to="/courses"
+              icon={<AutoAwesomeMotionIcon />}
+              selected={selected}
+              setSelected={setSelected}                
+            />
+            <Item
               title="Classes"
               to="/classes"
               icon={<AutoAwesomeMotionIcon />}
@@ -178,6 +196,14 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}                
             />
+            <Box position='absolute' bottom='0' sx={{ backgroundColor: colors.primary, width: '100%' }}>
+              <Divider />
+              <Item
+                title="Log out"
+                icon={<LogoutIcon />}
+                onClick={handleLogout}
+              />
+            </Box>
 
             {/* <SubMenu
               label='Courses'

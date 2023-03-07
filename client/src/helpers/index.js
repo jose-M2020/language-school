@@ -35,7 +35,7 @@ export const reservationStatus = (status) => {
     },
     {
       title: 'cancelled',
-      color: colors.secondary,
+      color: '#fdd2c7',
       canCancel: false
     }
   ]
