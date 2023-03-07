@@ -237,7 +237,7 @@ const Schedule = () => {
 
     await createReservation({
       userId,
-      payload: selectedReservations
+      payload
     })
     
     toast.success('Reservation added successfully!');
