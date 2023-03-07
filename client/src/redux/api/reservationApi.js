@@ -1,31 +1,46 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { reservationStatus } from "../../helpers";
 
 export const reservationsApi = createApi({
   baseQuery: fetchBaseQuery({ 
     baseUrl: 'http://localhost:4000/api',
     prepareHeaders: (headers, { getState, endpoint }) => {
       const token = getState().auth.token;
-      headers.set('Authorization', token ? `Bearer ${token}` : '');
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`)
+      }
+      
       return headers
     },
   }),
   reducerPath: "reservationApi",
   tagTypes: [
     "Reservations",
-  ],
-  
-  credentials: 'include', 
+  ], 
   endpoints: (builder) => ({
     getReservations: builder.query({
       query: (userId) => `/users/${userId}/reservations`,
       providesTags: ['Reservations'],
+      transformResponse: (response) => {
+        return response?.map(item => (
+          {
+            ...item,
+            color: reservationStatus(item.status).color,
+            startStr: item.date,
+          }
+        ));
+      }
     }),
     createReservation: builder.mutation({
-      query: (newReservation) => ({
-        url: "/reservations",
-        method: "POST",
-        body: newReservation,
-      }),
+      query: (data) => {
+        const {userId, payload} = data;
+        console.log(payload)
+        return {
+          url: `/users/${userId}/reservations`,
+          method: "POST",
+          body: payload,
+        }
+      },
       invalidatesTags: ["Reservations"],
     }),
     updateReservation: builder.mutation({

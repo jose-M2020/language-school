@@ -15,8 +15,8 @@ import CustomButton from '../../components/CustomButton'
 import CustomModal from '../../components/CustomModal'
 import { tokens } from '../../theme';
 import { hoursDiff, reservationStatus } from '../../helpers';
-import { useGetReservationsQuery } from '../../redux/api/reservationApi';
-import { useSelector } from 'react-redux';
+import { useCreateReservationMutation, useGetReservationsQuery, useUpdateReservationMutation } from '../../redux/api/reservationApi';
+import { useDispatch, useSelector } from 'react-redux';
 
 // TODO: 
   // 1.- Disabled the selection of ceills to book a class
@@ -67,8 +67,8 @@ const allowedDates = [
 const Schedule = () => {
   const userId = useSelector((state) => state.auth.user._id);
   const { data: reservations = [], isLoading, isError, error } = useGetReservationsQuery(userId);
-  
-  console.log(reservations);
+  const [createReservation, { isLoading: loadingPost, isError: postError  }] = useCreateReservationMutation();
+  const [updateReservation, { isLoading: loadingPatch, isError: patchError  }] = useUpdateReservationMutation();
   
   const [canBook, setCanBook] = useState(false);
   
@@ -77,6 +77,7 @@ const Schedule = () => {
   const limitHoursPerWeek = 8
   const [modal, setModal] = useState(false)
   const [currentEvent, setcurrentEvent] = useState({})
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setTimeout(() => {
@@ -138,7 +139,7 @@ const Schedule = () => {
 
     selectedReservations.push({
       date: selected.startStr,
-      studentId: 'wjh3jb434jb3j4bj',
+      studentId: userId,
       modality: 'In-person'
     });
     
@@ -170,15 +171,32 @@ const Schedule = () => {
     }
   }
 
-  const handleReservations = () => {
-    console.log(selectedReservations)
+  const handleAddReservations = async () => {
+    if(!selectedReservations.length){
+      return toast.error('Select at least one reservation');
+    }
+
+    setCanBook(false);
+
+    await dispatch(createReservation({
+      userId,
+      payload: selectedReservations
+    }))
+
+    toast.success('Reservation added successfully!');
+    setCanBook(true);
+  }
+  
+  const handleUpdateReservation = async () => {
+    
   }
 
   return (
     <DashboardLayout>
-        <CustomButton text='Book classes' onClick={handleReservations}></CustomButton>
+        <CustomButton text='Book classes' onClick={handleAddReservations}></CustomButton>
         <ToastContainer />
         <Box>
+          {!isLoading ? (
             <FullCalendar
               height="75vh"
               plugins={[
@@ -221,7 +239,16 @@ const Schedule = () => {
                 // {id: _id, ...props}
             //   ))}
             />
-          </Box>
+          ): (
+            <Typography 
+              variant='h4'
+              fontSize='2rem'
+              fontWeight='bold'
+              textAlign='center'
+              mt={6}
+            >Getting reservations...</Typography>
+          )}
+        </Box>
       
       <CustomModal
         title='Booking details'
