@@ -225,8 +225,7 @@ const Schedule = () => {
 
     const payload = selectedReservations.map(item => {
       // item.event.remove();
-      const calendarApi = item.view.calendar;
-      console.log(calendarApi)
+      // const calendarApi = item.view.calendar;
       return {
         date: item.startStr,
         studentId: userId,
@@ -234,19 +233,15 @@ const Schedule = () => {
       }
     })
 
+    setCanBook(false);
 
-
-    // console.log(payload);
-
-    // setCanBook(false);
-
-    // await createReservation({
-    //   userId,
-    //   payload: selectedReservations
-    // })
+    await createReservation({
+      userId,
+      payload: selectedReservations
+    })
     
-    // toast.success('Reservation added successfully!');
-    // setCanBook(true);
+    toast.success('Reservation added successfully!');
+    setCanBook(true);
   }
   
   const handleChangeReservation = (id) => {

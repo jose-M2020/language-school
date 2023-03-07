@@ -3,7 +3,7 @@ import { reservationStatus } from "../../helpers";
 
 export const reservationsApi = createApi({
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'http://localhost:4000/api',
+    baseUrl: 'https://grumpy-sheath-dress-deer.cyclic.app/api',
     prepareHeaders: (headers, { getState, endpoint }) => {
       const token = getState().auth.token;
       if (token) {
