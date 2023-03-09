@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createRef } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list";
-import { Avatar, Box, Chip, List, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Chip, List, ListItem, ListItemAvatar, ListItemText, Popover, Stack, Typography } from '@mui/material'
 import FilePresentIcon from '@mui/icons-material/FilePresent';
 import PersonIcon from '@mui/icons-material/Person';
 import DomainIcon from '@mui/icons-material/Domain';
@@ -17,6 +17,7 @@ import { tokens } from '../../theme';
 import { hoursDiff } from '../../helpers';
 import { useCreateReservationMutation, useGetReservationsQuery, useUpdateReservationMutation } from '../../redux/api/reservationApi';
 import { useSelector } from 'react-redux';
+import EventContent from './components/EventContent';
 
 // TODO: 
   // 1.- Disabled the selection of ceills to book a class
@@ -69,7 +70,7 @@ const Schedule = () => {
   const { data: reservations = [], isLoading, isError, error } = useGetReservationsQuery(userId);
   const [createReservation, { isLoading: loadingPost, isError: postError  }] = useCreateReservationMutation();
   const [updateReservation, { isLoading: loadingPatch, isError: patchError  }] = useUpdateReservationMutation();
-  
+  const fullCalendarRef = createRef();
   const [canBook, setCanBook] = useState(false);
   
   const selectedReservations = [];
@@ -82,100 +83,19 @@ const Schedule = () => {
       setCanBook(true)
     }, 1000);
   }, [])
-  console.log(reservations)
+
+  useEffect(() => {
+    console.log('data changed')
+  }, [reservations])
   // FullCalendar Functions
 
-  const renderEventContent = (eventInfo) => {
-    const {
-      timeText,
-      event: {extendedProps: {
-        _id,
-        status,
-        topic,
-        teacher,
-        classroom
-      }}
-    } = eventInfo;
-    const canCancel = status === 'pending' || status === 'confirmed';
-    
-    return (
-      (status ? (
-        <Stack 
-          sx={{
-            position: 'relative',
-            padding: '7px',
-            '&:hover .dialog': {
-                display: 'block',
-              }
-          }}>
-          <Typography variant='span' fontWeight='bold'>{timeText}</Typography>
-          <Typography noWrap={true}>Topic: {topic}</Typography>
-          <Typography noWrap={true}>Teacher: {teacher}</Typography>
-          {/* {eventInfo.event.id === 'wait' && } */}
-          {
-            canCancel && (
-              <CustomButton
-                id={_id}
-                text='Cancel'
-                btnstyle='danger'
-                size='sm'
-                mt={7}
-                onClick={() => handleChangeReservation(_id)}
-              />
-            )
-          }
-
-          {(status !== 'processing' && (
-            <Stack 
-              className='dialog'
-              spacing='6px' 
-              sx={{ 
-                display: 'none',
-                padding: '10px',
-                background: '#ecf1f4',
-                boxShadow: '0 0 6px #817d7d',
-                borderRadius: '6px',
-                color: colors.primary,
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                width: '200px',
-                zIndex: 1000000
-              }}
-            >
-              <Box display='flex' alignItems='center'>
-                <Box
-                  sx={{
-                    width: '13px',
-                    height: '13px',
-                    borderRadius: '50%',
-                    backgroundColor: colors.primary,
-                    mr: '8px'
-                  }}  
-                ></Box>
-                <Typography 
-                  variant='span'
-                >{ status }</Typography>
-              </Box>
-              <Typography fontSize='1.5rem' fontWeight='bold'>{ timeText }</Typography>
-              <Stack spacing='3px'>
-                <Typography sx={{ overflowWrap: 'break-word' }}>Topic: { topic }</Typography>
-                <Typography sx={{ overflowWrap: 'break-word' }}>Teacher: { teacher }</Typography>
-                <Typography sx={{ overflowWrap: 'break-word' }}>Classroom: { classroom }</Typography>
-              </Stack>
-            </Stack>
-          ))}
-        </Stack>
-      ): (
-        <Box bgcolor='#dae4e9'></Box>
-      ))
-    )
-  }
+  
+  console.log('schedule render');
 
   const handleDateClick = (selected) =>{
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
-
+    
     const filteredItems = reservations.filter(item => (
       item.status !== 'cancelled'
     ))
@@ -189,7 +109,7 @@ const Schedule = () => {
     ){
       return;
     }
-
+    
     selectedReservations.push(selected);
     
     calendarApi.addEvent({
@@ -222,10 +142,11 @@ const Schedule = () => {
     if(!selectedReservations.length){
       return toast.error('Select at least one reservation');
     }
-
+    console.log(fullCalendarRef.current)
     const payload = selectedReservations.map(item => {
       // item.event.remove();
       // const calendarApi = item.view.calendar;
+      console.log(item)
       return {
         date: item.startStr,
         studentId: userId,
@@ -233,22 +154,24 @@ const Schedule = () => {
       }
     })
 
-    setCanBook(false);
+    // setCanBook(false);
 
-    await createReservation({
-      userId,
-      payload
-    })
+    // await createReservation({
+    //   userId,
+    //   payload
+    // })
     
-    toast.success('Reservation added successfully!');
-    setCanBook(true);
+    // toast.success('Reservation added successfully!');
+    // setCanBook(true);
   }
   
   const handleChangeReservation = (id) => {
-    updateReservation({
-      data: {userId, reservationId: id},
-      payload: {status: 'cancelled'}
-    })
+    if(window.confirm('Are you sure you want to cancel?')){
+      updateReservation({
+        data: {userId, reservationId: id},
+        payload: {status: 'cancelled'}
+      })
+    }
   }
 
   return (
@@ -258,7 +181,8 @@ const Schedule = () => {
         <Box>
           {!isLoading ? (
             <FullCalendar
-              height="75vh"
+              ref={fullCalendarRef}
+              // height="75vh"
               plugins={[
                 dayGridPlugin,
                 timeGridPlugin,
@@ -292,9 +216,10 @@ const Schedule = () => {
               dayMaxEvents={1}
               select={handleDateClick}
               eventClick={handleEventClick}
-              eventContent={renderEventContent}
+              eventContent={eventInfo => <EventContent eventInfo={eventInfo} />}
               longPressDelay={1}
-            //   initialEvents={data?.events.map(({_id, ...props}) => (
+              contentHeight='auto'
+              stickyHeaderDates={true}
               initialEvents={reservations}
                 // {id: _id, ...props}
             //   ))}

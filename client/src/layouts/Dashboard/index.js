@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar'
 
 const DashboardLayout = ({children}) => {
+  console.log('DashboardLayout render')
   const colors = tokens();
   const isMobil = useMediaQuery('(max-width:600px)');
   const [stateMobile, setStateMobile] = useState(false);

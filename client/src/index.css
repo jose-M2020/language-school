@@ -18,4 +18,12 @@ main {
 
 .fc .fc-timegrid-cols .fc-timegrid-event-harness {
   z-index: -1 !important;
-} 
+}
+
+/* .fc .fc-timegrid-col.fc-day-today{
+  width: 150px;
+} */
+
+/* .fc-theme-standard th {
+  width: 150px;
+} */

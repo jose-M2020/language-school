@@ -3,7 +3,7 @@ import { reservationStatus } from "../../helpers";
 
 export const reservationsApi = createApi({
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'https://grumpy-sheath-dress-deer.cyclic.app/api',
+    baseUrl: process.env.REACT_APP_BASE_URL,
     prepareHeaders: (headers, { getState, endpoint }) => {
       const token = getState().auth.token;
       if (token) {

@@ -1,4 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/dist/query';
 import {
   persistReducer,
   FLUSH,
@@ -28,14 +29,16 @@ const reducers = combineReducers({
 const persistedReducer = persistReducer(persistConfig, reducers);
 
 export const store = configureStore({
-    reducer: persistedReducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: {
-          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-        },
-      }).concat(
-        reservationsApi.middleware,
-        authApi.middleware
-      ),
-  });
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(
+      reservationsApi.middleware,
+      authApi.middleware
+    ),
+});
+
+setupListeners(store.dispatch);
