@@ -1,12 +1,8 @@
 import { Box, Button, Drawer, useMediaQuery } from '@mui/material';
 import React, { useState } from 'react'
-import { tokens } from '../../theme';
-import Header from './components/Header';
 import Sidebar from './components/Sidebar'
 
 const DashboardLayout = ({children}) => {
-  console.log('DashboardLayout render')
-  const colors = tokens();
   const isMobil = useMediaQuery('(max-width:600px)');
   const [stateMobile, setStateMobile] = useState(false);
 
@@ -19,27 +15,30 @@ const DashboardLayout = ({children}) => {
   };
 
   return (
-    <Box sx={{display: 'flex', position: 'relative'}}>
-      {isMobil ? (
-        <>
-          <Button onClick={toggleDrawer(true)}>left</Button>
-          <Drawer
-                anchor='left'
-                open={stateMobile}
-                onClose={toggleDrawer(false)}
-              >
-            <Sidebar />
-          </Drawer>
-        </>
-      ) : (
-        <Sidebar />
-      )}
-      <main>
-        <Box px={3}>
-          <Header title="PROJECTS" subtitle="Managing projects" />
+    <Box>
+      
+      <Box sx={{display: 'flex', position: 'relative'}}>
+        {isMobil ? (
+          <>
+            <Button onClick={toggleDrawer(true)}>left</Button>
+            <Drawer
+                  anchor='left'
+                  open={stateMobile}
+                  onClose={toggleDrawer(false)}
+                >
+              <Sidebar />
+            </Drawer>
+          </>
+        ) : (
+          <Sidebar />
+        )}
+        <main>
+          {/* <Topbar /> */}
+          <Box px={3}>
             {children}
-        </Box>
-      </main>
+          </Box>
+        </main>
+      </Box>
     </Box>
   )
 }

@@ -25,7 +25,7 @@ export const reservationsApi = createApi({
         return response?.map(item => (
           {
             ...item,
-            color: reservationStatus(item.status).color,
+            id: item._id,
             startStr: item.date,
           }
         ));

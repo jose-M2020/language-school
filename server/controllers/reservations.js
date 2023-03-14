@@ -55,9 +55,8 @@ export const createReservation = async (req, res) => {
     // if (!reservationExists)
     //   return res.status(400).json({ error: "Reservation doesn't exist" });
     
-    const newReservations = Reservation.insertMany(body);
-    // const savedReservation = await newReservation.save();
-
+    const newReservations = await Reservation.insertMany(body);
+    
     res.status(201).json(newReservations);
   } catch (err) {
     res.status(500).json({ error: err.message });

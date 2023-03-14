@@ -19,23 +19,33 @@ export const hexToRgba = (hex, alpha) => {
 export const reservationStatus = (status) => {
   const statusArray = [
     {
-      title: 'pending',
-      color: hexToRgba(colors.primary, 0.5),
-      canCancel: true
-    },
-    {
-      title: 'confirmed',
-      color: hexToRgba(colors.primary, 0.8),
-      canCancel: true
-    },
-    {
-      title: 'attended',
+      title: 'processing',
+      bgColor: '#dae4e9',
       color: colors.primary,
       canCancel: false
     },
     {
+      title: 'pending',
+      bgColor: hexToRgba(colors.primary, 0.5),
+      color: colors.white,
+      canCancel: true
+    },
+    {
+      title: 'confirmed',
+      bgColor: hexToRgba(colors.primary, 0.8),
+      color: colors.white,
+      canCancel: true
+    },
+    {
+      title: 'attended',
+      bgColor: colors.primary,
+      color: colors.white,
+      canCancel: false
+    },
+    {
       title: 'cancelled',
-      color: '#fdd2c7',
+      bgColor: '#fdd2c7',
+      color: colors.primary,
       canCancel: false
     }
   ]
@@ -43,4 +53,25 @@ export const reservationStatus = (status) => {
   return status ? (
     statusArray.find(item => item.title === status)
   ) : statusArray;
+}
+
+export const getWeekDates = (date) => {  
+  date = new Date(date ?? '');
+
+  // Determine the start date of the current week (Sunday)
+  let firstDayOfWeek = new Date(
+    date.getFullYear(),
+    date.getMonth(), 
+    date.getDate() - (date.getDay() - 1)
+  );
+  let datesOfWeek = [];
+
+  // Loop through the week, adding each day to the array
+  for (let i = 0; i < 7; i++) {
+    let date = new Date(firstDayOfWeek);
+    date.setDate(firstDayOfWeek.getDate() + i);
+    datesOfWeek.push(date);
+  }
+
+  return datesOfWeek;
 }

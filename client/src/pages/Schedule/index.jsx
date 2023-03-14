@@ -4,20 +4,16 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction"
 import listPlugin from "@fullcalendar/list";
-import { Avatar, Box, Chip, List, ListItem, ListItemAvatar, ListItemText, Popover, Stack, Typography } from '@mui/material'
-import FilePresentIcon from '@mui/icons-material/FilePresent';
-import PersonIcon from '@mui/icons-material/Person';
-import DomainIcon from '@mui/icons-material/Domain';
-import { ToastContainer, toast } from 'react-toastify';
+import { Box, Typography } from '@mui/material'
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DashboardLayout from '../../layouts/Dashboard'
 import CustomButton from '../../components/CustomButton'
-import CustomModal from '../../components/CustomModal'
-import { tokens } from '../../theme';
-import { hoursDiff } from '../../helpers';
-import { useCreateReservationMutation, useGetReservationsQuery, useUpdateReservationMutation } from '../../redux/api/reservationApi';
+import { getWeekDates, hoursDiff } from '../../helpers';
+import { useCreateReservationMutation, useGetReservationsQuery } from '../../redux/api/reservationApi';
 import { useSelector } from 'react-redux';
 import EventContent from './components/EventContent';
+import Header from '../../layouts/Dashboard/components/Header';
 
 // TODO: 
   // 1.- Disabled the selection of ceills to book a class
@@ -28,7 +24,6 @@ import EventContent from './components/EventContent';
 
   // TODO:Add status field to the schema model in mongoose, to check if the class is available or reservation
 
-const colors = tokens()
 // const reservations = [
 //   {
 //     id: "12315",
@@ -67,17 +62,19 @@ const allowedDates = [
 
 const Schedule = () => {
   const userId = useSelector((state) => state.auth.user._id);
-  const { data: reservations = [], isLoading, isError, error } = useGetReservationsQuery(userId);
-  const [createReservation, { isLoading: loadingPost, isError: postError  }] = useCreateReservationMutation();
-  const [updateReservation, { isLoading: loadingPatch, isError: patchError  }] = useUpdateReservationMutation();
+  const { data: reservations = [], isLoading } = useGetReservationsQuery(userId);
+  const [createReservation, { 
+    isLoading: loadingPost,
+    isError: isPostError,
+    isSuccess: isPostSuccess,
+    data
+  }] = useCreateReservationMutation();
+  
   const fullCalendarRef = createRef();
   const [canBook, setCanBook] = useState(false);
+  const limitHoursPerWeek = 8;
+  const [selectedReservations, setSelectedReservations] = useState([])
   
-  const selectedReservations = [];
-  
-  const limitHoursPerWeek = 8
-  // const [modal, setModal] = useState(false)
-    
   useEffect(() => {
     setTimeout(() => {
       setCanBook(true)
@@ -85,38 +82,75 @@ const Schedule = () => {
   }, [])
 
   useEffect(() => {
-    console.log('data changed')
-  }, [reservations])
-  // FullCalendar Functions
+    if(isPostError){
+      toast.error('There was an error!');
+    }
+    if(isPostSuccess){
+      const calendarApi = fullCalendarRef.current.getApi();
+      const events = calendarApi.getEvents()
 
+      events.forEach(event => (
+        (event.extendedProps.status === 'processing') && event.remove() 
+      ))
+      setSelectedReservations([]);
+      toast.success('Reservation added successfully!');
+    }
+  }, [loadingPost])
+
+  useEffect(() => {
+    if(data){
+      const calendarApi = fullCalendarRef.current.getApi();
+
+      data?.forEach(item => {
+        calendarApi.addEvent({
+          ...item,
+          id: item._id,
+          startStr: item.date,
+        })
+    });
+    }
+  }, [data])
   
-  console.log('schedule render');
 
+  // FullCalendar Functions
+  
   const handleDateClick = (selected) =>{
+    const datesOfWeek = getWeekDates(selected.startStr)
     const calendarApi = selected.view.calendar;
     calendarApi.unselect();
     
-    const filteredItems = reservations.filter(item => (
-      item.status !== 'cancelled'
-    ))
+    const totalReservationsPerWeek = reservations.filter(item => {
+      const belongsToWeek = datesOfWeek.some(date => (
+        new Date(date).toDateString()  === new Date(item.startStr).toDateString()
+      ));
 
-    if((filteredItems?.length + selectedReservations?.length) >= limitHoursPerWeek){
+      return item.status !== 'cancelled' && belongsToWeek
+    })?.length;
+    
+    const totalSelectedPerWeek = selectedReservations.filter(item => {
+      return datesOfWeek.some(date => (
+        new Date(date).toDateString()  === new Date(item.startStr).toDateString()
+      ));
+    })?.length
+
+    if((totalReservationsPerWeek + totalSelectedPerWeek) >= limitHoursPerWeek){
       return toast.info("You've exceeded the limit of hours per week!");
     }
     if(
-      reservations?.some(item => item.date === selected.startStr) ||
-      selectedReservations?.some(item => item.date === selected.startStr)
+      reservations?.some(item => item.startStr === selected.startStr) ||
+      selectedReservations?.some(item => item.startStr === selected.startStr)
     ){
       return;
     }
     
-    selectedReservations.push(selected);
+    setSelectedReservations([
+      ...selectedReservations,
+      selected
+    ])
     
     calendarApi.addEvent({
       start: selected.startStr,
-      status: 'processing',
-      color: '#dae4e9',
-      textColor: colors.primary,
+      status: 'processing'
     });
   }
 
@@ -137,16 +171,18 @@ const Schedule = () => {
   }
 
   // Api Calls
-
+  
   const handleAddReservations = async () => {
+    if(loadingPost) return;
     if(!selectedReservations.length){
       return toast.error('Select at least one reservation');
     }
-    console.log(fullCalendarRef.current)
+    // Example code for fullcalendar functions (IT'S WORKING)
+    // const findedItem = calendarApi.getEventById('6407f46364dba2c2b108206f');
+    // calendarApi.addEvent({});
+    // findedItem.remove()
+
     const payload = selectedReservations.map(item => {
-      // item.event.remove();
-      // const calendarApi = item.view.calendar;
-      console.log(item)
       return {
         date: item.startStr,
         studentId: userId,
@@ -154,44 +190,38 @@ const Schedule = () => {
       }
     })
 
-    // setCanBook(false);
-
-    // await createReservation({
-    //   userId,
-    //   payload
-    // })
-    
-    // toast.success('Reservation added successfully!');
-    // setCanBook(true);
-  }
-  
-  const handleChangeReservation = (id) => {
-    if(window.confirm('Are you sure you want to cancel?')){
-      updateReservation({
-        data: {userId, reservationId: id},
-        payload: {status: 'cancelled'}
-      })
-    }
+    setCanBook(false);
+    await createReservation({
+      userId,
+      payload
+    })
+    setCanBook(true);
   }
 
   return (
     <DashboardLayout>
-        <CustomButton text='Book classes' onClick={handleAddReservations}></CustomButton>
-        <ToastContainer />
+      <Header title="RESERVATIONS" />
         <Box>
           {!isLoading ? (
             <FullCalendar
               ref={fullCalendarRef}
               // height="75vh"
+              initialEvents={reservations}
               plugins={[
                 dayGridPlugin,
                 timeGridPlugin,
                 interactionPlugin,
                 listPlugin,
               ]}
+              customButtons={{
+                myCustomButton: {
+                  text: loadingPost ? 'Booking...' : 'Book classes',
+                  click: () => {handleAddReservations()},
+                }
+              }}
               headerToolbar={{
-                left: "prev,next today",
-                center: "title",
+                left: "myCustomButton",
+                center: "prev,title,next",
                 right: "timeGridWeek,listMonth",
               }}
               hiddenDays={[0]}
@@ -201,6 +231,9 @@ const Schedule = () => {
               slotMaxTime='21:00:00'
               firstDay={(new Date()).getDay()}
               allDaySlot={false}
+              titleFormat={{
+                month: 'long', year: 'numeric', day: 'numeric'
+              }}
               dayCellClassNames='row'
               selectAllow={(selectInfo) => {
                 if(!canBook) return false;
@@ -214,13 +247,23 @@ const Schedule = () => {
               selectable={true}
               selectMirror={true}
               dayMaxEvents={1}
+              validRange={(nowDate) => {
+                const limitDate = new Date();
+                limitDate.setDate(limitDate.getDate() + 13)
+
+                return {
+                  start: nowDate,
+                  end: limitDate
+                }
+              }}
+
               select={handleDateClick}
               eventClick={handleEventClick}
-              eventContent={eventInfo => <EventContent eventInfo={eventInfo} />}
+              eventContent={(eventInfo) => <EventContent eventInfo={eventInfo} calendarRef={fullCalendarRef} />}
               longPressDelay={1}
+              
               contentHeight='auto'
               stickyHeaderDates={true}
-              initialEvents={reservations}
                 // {id: _id, ...props}
             //   ))}
             />
@@ -234,41 +277,6 @@ const Schedule = () => {
             >Getting reservations...</Typography>
           )}
         </Box>
-
-      {/* <CustomModal
-        title='Booking details'
-        open={modal}
-        handleClose={() => setModal(!modal)}
-      > */}
-        
-
-        {/* <List sx={{ width: '100%', maxWidth: 360 }}>
-          <ListItem disableGutters>
-            <ListItemAvatar>
-              <Avatar>
-                <FilePresentIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Topic" secondary="Jan 9, 2014" />
-          </ListItem>
-          <ListItem disableGutters>
-            <ListItemAvatar>
-              <Avatar>
-                <PersonIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Teacher" secondary="Jan 7, 2014" />
-          </ListItem>
-          <ListItem disableGutters>
-            <ListItemAvatar>
-              <Avatar>
-                <DomainIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Classroom" secondary="July 20, 2014" />
-          </ListItem>
-        </List> */}
-      {/* </CustomModal> */}
     </DashboardLayout>
   )
 }

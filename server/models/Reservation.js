@@ -15,7 +15,7 @@ const ReservationSchema = new mongoose.Schema({
     type: Number
   },
   date: {
-    type: Date,
+    type: String,
     required: true
   },
   modality: {

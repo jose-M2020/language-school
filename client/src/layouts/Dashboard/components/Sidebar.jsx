@@ -1,45 +1,72 @@
 import { useState } from "react";
 import { Sidebar as ProSidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { Avatar, Box, Divider, IconButton, Typography, useMediaQuery } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PaidIcon from '@mui/icons-material/Paid';
+import EventIcon from '@mui/icons-material/Event';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloseIcon from '@mui/icons-material/Close';
 import { hexToRgba } from "../../../helpers";
 import { useDispatch } from "react-redux";
 import { setLogout } from "../../../redux/features/authSlice";
 
-const colors = tokens();
 
-const Item = ({ title, to, icon, selected, setSelected, ...props }) => {
+const Item = ({ title, to, icon, selected, setSelected }) => {
+  const colors = tokens();
   return (
     <MenuItem
       active={selected === title}
-      onClick={() => setSelected(title)}
+      // onClick={() => setSelected(title)}
       icon={icon}
       component={<Link to={to} />}
-      {...props}
+      rootStyles={{
+        position: 'relative',
+        backgroundColor: selected === to && colors.white,
+        color: selected === to && colors.primary,
+        // borderLeft: selected === to && `2conpx solid ${colors.greenAccent}`,
+        ...(selected === to && {
+          '&::after, &::before': {
+            content: '""',
+            position: 'absolute',
+            top: '-50px',
+            right: 0,
+            height: '50px',
+            width: '20px',
+            borderRadius: '0 0 25px 0',
+            zIndex: -1,
+          },
+          '&::before': {
+            top: 'auto',
+            borderRadius: '0 25px 0 0',
+            bottom: '-50px',
+            boxShadow: `0 -25px 0 0 ${colors.white}`
+          },
+          '&::after': {
+            boxShadow: `0 25px 0 0 ${colors.white}`
+          },
+        })
+      }}
     >
       <Typography>{title}</Typography>
     </MenuItem>
   );
 };
 
-
-
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState("Dashboard");
-  const { collapseSidebar, collapsed } = useProSidebar();
+  const dispatch = useDispatch();
+  const colors = tokens();
   const isMobil = useMediaQuery('(max-width:600px)');
-  const dispatch = useDispatch()
+  const {pathname} = useLocation();
+  const { collapseSidebar, collapsed } = useProSidebar();
+  const [selected, setSelected] = useState(pathname);
 
   const menuItemStyles = {
     // root: {
@@ -50,17 +77,17 @@ const Sidebar = () => {
       color: '#b6b7b9',
     },
     subMenuContent: ({ level }) => ({
-      backgroundColor:
-        level === 0
-          ? hexToRgba(colors.primary, !collapsed ? 0 : 1)
-          : 'transparent',
+      // backgroundColor:
+      //   level === 0
+      //     ? hexToRgba(colors.primary, !collapsed ? 0 : 1)
+      //     : 'transparent',
     }),
     button: ({ level, active, disabled }) => (
       {
         color: active && `${colors.secondary} !important`,
         backgroundColor: 'transparent',
         '&:hover': {
-          color: `${colors.secondary} !important`,
+          color: `${colors.greenAccent} !important`,
           backgroundColor: 'transparent'
         }
       }
@@ -69,11 +96,13 @@ const Sidebar = () => {
     //   fontWeight: open ? 600 : undefined,
     // }),
   };
-
   const handleLogout = () =>{
     dispatch(setLogout());
     navigate('login');
   }
+
+  // TODO: Fix problem with twice rendering, make the value state (collapse and link active) of sidebar back to the default value
+  console.log('rendering sidebar')
 
   return (
     <Box
@@ -155,7 +184,7 @@ const Sidebar = () => {
           )}
 
             <Item
-              title="Dashboard"
+              title="Overview"
               to="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
@@ -169,13 +198,6 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
             <Item
-                title="Evaluations"
-                to="/evaluations"
-                icon={<ContentPasteSearchIcon />}
-                selected={selected}
-                setSelected={setSelected}                
-              />
-            <Item
               title="Courses"
               to="/courses"
               icon={<AutoAwesomeMotionIcon />}
@@ -183,9 +205,16 @@ const Sidebar = () => {
               setSelected={setSelected}                
             />
             <Item
-              title="Classes"
-              to="/classes"
-              icon={<AutoAwesomeMotionIcon />}
+              title="Events"
+              to="/events"
+              icon={<EventIcon />}
+              selected={selected}
+              setSelected={setSelected}                
+            />
+            <Item
+              title="Transactions"
+              to="/transactions"
+              icon={<PaidIcon />}
               selected={selected}
               setSelected={setSelected}                
             />
@@ -196,13 +225,14 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}                
             />
-            <Box position='absolute' bottom='0' sx={{ backgroundColor: colors.primary, width: '100%' }}>
+            <Box position='absolute' bottom='0' sx={{ boxShadow: `0 -4px 6px ${colors.primary}`, width: '100%' }}>
               <Divider />
-              <Item
-                title="Log out"
+              <MenuItem
                 icon={<LogoutIcon />}
                 onClick={handleLogout}
-              />
+              >
+                <Typography>Log out</Typography>
+              </MenuItem>
             </Box>
 
             {/* <SubMenu

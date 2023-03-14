@@ -20,6 +20,11 @@ main {
   z-index: -1 !important;
 }
 
+.fc-v-event {
+  background-color: transparent;
+  /* border: 1px solid var(--fc-event-border-color); */
+}
+
 /* .fc .fc-timegrid-col.fc-day-today{
   width: 150px;
 } */
@@ -27,3 +32,50 @@ main {
 /* .fc-theme-standard th {
   width: 150px;
 } */
+
+
+/* Header FullCalendar */
+
+.fc-toolbar-chunk > div{
+  display: flex;
+  align-items: center;
+}
+
+.fc .fc-toolbar-chunk .fc-next-button,
+.fc .fc-toolbar-chunk .fc-prev-button  {
+  background-color: transparent;
+  border: none;
+  color: #6e6e6e;
+  font-size: 1.4rem;
+}
+
+.fc .fc-toolbar-chunk .fc-next-button:disabled,
+.fc .fc-toolbar-chunk .fc-prev-button:disabled {
+  color: #bebebe;
+}
+
+.fc .fc-toolbar-chunk > div .fc-button-primary:not(:disabled):active:focus {
+  background-color: transparent;
+  box-shadow: none;
+  color: #6e6e6e;
+}
+
+/* Users */
+
+.table-content__thead{  
+  box-shadow: 0 0 6px #989696;
+}
+
+.table-content__thead th{
+  padding: 8px;
+  background-color: #f2f2ff;
+}
+
+.table-content__tbody td{
+  padding: 10px;
+  border: 1px rgb(223, 223, 223);
+}
+
+.table-content__tbody:n {
+  background-color: rgb(192, 192, 192);
+}
