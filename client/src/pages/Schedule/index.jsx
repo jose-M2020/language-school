@@ -7,8 +7,6 @@ import listPlugin from "@fullcalendar/list";
 import { Box, Typography } from '@mui/material'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import DashboardLayout from '../../layouts/Dashboard'
-import CustomButton from '../../components/CustomButton'
 import { getWeekDates, hoursDiff } from '../../helpers';
 import { useCreateReservationMutation, useGetReservationsQuery } from '../../redux/api/reservationApi';
 import { useSelector } from 'react-redux';
@@ -199,7 +197,7 @@ const Schedule = () => {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <Header title="RESERVATIONS" />
         <Box>
           {!isLoading ? (
@@ -277,7 +275,7 @@ const Schedule = () => {
             >Getting reservations...</Typography>
           )}
         </Box>
-    </DashboardLayout>
+    </>
   )
 }
 

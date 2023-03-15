@@ -1,5 +1,4 @@
 import React from 'react'
-import DashboardLayout from '../../layouts/Dashboard'
 import { useGetUsersQuery } from '../../redux/api/userApi';
 
 const Users = () => {
@@ -7,7 +6,7 @@ const Users = () => {
 
 
   return (
-    <DashboardLayout>`
+    <>
         {!isLoading && (
             <div>
                 <table className='table-content'>
@@ -29,7 +28,7 @@ const Users = () => {
             </div>
 
         )}
-    </DashboardLayout>
+    </>
   )
 }
 

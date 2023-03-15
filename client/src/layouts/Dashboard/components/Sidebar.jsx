@@ -17,21 +17,21 @@ import { hexToRgba } from "../../../helpers";
 import { useDispatch } from "react-redux";
 import { setLogout } from "../../../redux/features/authSlice";
 
-
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const colors = tokens();
+  
   return (
     <MenuItem
       active={selected === title}
-      // onClick={() => setSelected(title)}
+      onClick={() => setSelected(title)}
       icon={icon}
       component={<Link to={to} />}
       rootStyles={{
         position: 'relative',
-        backgroundColor: selected === to && colors.white,
-        color: selected === to && colors.primary,
-        // borderLeft: selected === to && `2conpx solid ${colors.greenAccent}`,
-        ...(selected === to && {
+        backgroundColor: selected === title && colors.white,
+        color: selected === title && colors.primary,
+        // borderLeft: selected === title && `2conpx solid ${colors.greenAccent}`,
+        ...(selected === title && {
           '&::after, &::before': {
             content: '""',
             position: 'absolute',
@@ -66,7 +66,7 @@ const Sidebar = () => {
   const isMobil = useMediaQuery('(max-width:600px)');
   const {pathname} = useLocation();
   const { collapseSidebar, collapsed } = useProSidebar();
-  const [selected, setSelected] = useState(pathname);
+  const [selected, setSelected] = useState('Dashboard');
 
   const menuItemStyles = {
     // root: {
@@ -84,10 +84,10 @@ const Sidebar = () => {
     }),
     button: ({ level, active, disabled }) => (
       {
-        color: active && `${colors.secondary} !important`,
+        color: active && `${colors.primary} !important`,
         backgroundColor: 'transparent',
         '&:hover': {
-          color: `${colors.greenAccent} !important`,
+          color: `${!active && colors.greenAccent} !important`,
           backgroundColor: 'transparent'
         }
       }
@@ -100,9 +100,6 @@ const Sidebar = () => {
     dispatch(setLogout());
     navigate('login');
   }
-
-  // TODO: Fix problem with twice rendering, make the value state (collapse and link active) of sidebar back to the default value
-  console.log('rendering sidebar')
 
   return (
     <Box
@@ -184,7 +181,7 @@ const Sidebar = () => {
           )}
 
             <Item
-              title="Overview"
+              title="Dashboard"
               to="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}

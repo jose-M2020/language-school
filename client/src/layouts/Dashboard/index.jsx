@@ -1,8 +1,9 @@
 import { Box, Button, Drawer, useMediaQuery } from '@mui/material';
 import React, { useState } from 'react'
+import { Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar'
 
-const DashboardLayout = ({children}) => {
+const DashboardLayout = () => {
   const isMobil = useMediaQuery('(max-width:600px)');
   const [stateMobile, setStateMobile] = useState(false);
 
@@ -15,17 +16,17 @@ const DashboardLayout = ({children}) => {
   };
 
   return (
-    <Box>
+    <>
       
       <Box sx={{display: 'flex', position: 'relative'}}>
         {isMobil ? (
           <>
             <Button onClick={toggleDrawer(true)}>left</Button>
             <Drawer
-                  anchor='left'
-                  open={stateMobile}
-                  onClose={toggleDrawer(false)}
-                >
+              anchor='left'
+              open={stateMobile}
+              onClose={toggleDrawer(false)}
+            >
               <Sidebar />
             </Drawer>
           </>
@@ -35,11 +36,11 @@ const DashboardLayout = ({children}) => {
         <main>
           {/* <Topbar /> */}
           <Box px={3}>
-            {children}
+            <Outlet />
           </Box>
         </main>
       </Box>
-    </Box>
+    </>
   )
 }
 

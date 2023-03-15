@@ -16,6 +16,7 @@ import CourseResources from './pages/courses/CourseResources';
 import Events from './pages/Events';
 import Transactions from './pages/Transactions';
 import Account from './pages/Account';
+import DashboardLayout from './layouts/Dashboard';
 
 function App() {
   const theme = useMode();
@@ -33,55 +34,60 @@ function App() {
             path='/login' 
             element={!isAuth ? <Login /> : <Navigate to="/dashboard" />} 
           />
-          <Route 
-            path='/register' 
-            element={isAuth ? <Register /> : <Navigate to="/login" />} 
-          />
           <Route
-            path='/dashboard'
-            element={isAuth ? <Dashboard /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/schedule'
-            element={isAuth ? <Schedule /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/courses'
-            element={isAuth ? <CourseList /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/courses/:id'
-            element={isAuth ? <CourseDetails /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/courses/:id/classes'
-            element={isAuth ? <CourseClasses /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/courses/:id/evaluations'
-            element={isAuth ? <CourseEvaluations /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/courses/:id/resources'
-            element={isAuth ? <CourseResources /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/events'
-            element={isAuth ? <Events /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/transactions'
-            element={isAuth ? <Transactions /> : <Navigate to="/login" />}
-          />
-          <Route
-            path='/account'
-            element={isAuth ? <Account /> : <Navigate to="/login" />}
-          />
+            path='/'
+            element={<DashboardLayout />}
+          >
+            <Route 
+              path='register' 
+              element={isAuth ? <Register /> : <Navigate to="/login" />} 
+            />
+            <Route
+              path='dashboard'
+              element={isAuth ? <Dashboard /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='schedule'
+              element={isAuth ? <Schedule /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='courses'
+              element={isAuth ? <CourseList /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='courses/:id'
+              element={isAuth ? <CourseDetails /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='courses/:id/classes'
+              element={isAuth ? <CourseClasses /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='courses/:id/evaluations'
+              element={isAuth ? <CourseEvaluations /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='courses/:id/resources'
+              element={isAuth ? <CourseResources /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='events'
+              element={isAuth ? <Events /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='transactions'
+              element={isAuth ? <Transactions /> : <Navigate to="/login" />}
+            />
+            <Route
+              path='account'
+              element={isAuth ? <Account /> : <Navigate to="/login" />}
+            />
 
-          <Route
-            path='/users'
-            element={<Users/>}
-          />
+            <Route
+              path='users'
+              element={<Users/>}
+            />
+          </Route>
         </Routes>
       </div>
     </ThemeProvider>

@@ -1,5 +1,4 @@
 import { Box } from '@mui/system'
-import DashboardLayout from '../../layouts/Dashboard'
 import Header from '../../layouts/Dashboard/components/Header'
 import StatCard from './components/StatCard'
 import SchoolIcon from '@mui/icons-material/School';
@@ -15,7 +14,7 @@ const Dashboard = () => {
   // const isNonMediumScreens = useMediaQuery("(min-width: 800px)");
 
   return (
-    <DashboardLayout>
+    <>
       <Header title="OVERVIEW" />
       <Alert severity="info" sx={{ mb: '22px' }}>
         <AlertTitle><b>Your current membership is paused.</b></AlertTitle>
@@ -96,7 +95,7 @@ const Dashboard = () => {
       <Box height="60vh">
         <LineChart />
       </Box>
-    </DashboardLayout>
+    </>
   )
 }
 
