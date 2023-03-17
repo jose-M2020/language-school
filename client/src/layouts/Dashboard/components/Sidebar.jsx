@@ -17,21 +17,20 @@ import { hexToRgba } from "../../../helpers";
 import { useDispatch } from "react-redux";
 import { setLogout } from "../../../redux/features/authSlice";
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, path, icon, selected, setSelected }) => {
   const colors = tokens();
   
   return (
     <MenuItem
-      active={selected === title}
-      onClick={() => setSelected(title)}
+      active={selected === path}
+      onClick={() => setSelected(path)}
       icon={icon}
-      component={<Link to={to} />}
+      component={<Link to={path} />}
       rootStyles={{
         position: 'relative',
-        backgroundColor: selected === title && colors.white,
-        color: selected === title && colors.primary,
-        // borderLeft: selected === title && `2conpx solid ${colors.greenAccent}`,
-        ...(selected === title && {
+        backgroundColor: selected === path && colors.white,
+        color: selected === path && colors.primary,
+        ...(selected === path && {
           '&::after, &::before': {
             content: '""',
             position: 'absolute',
@@ -60,13 +59,13 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 };
 
 const Sidebar = () => {
+  const { pathname } = useLocation();
+  const isMobil = useMediaQuery('(max-width:600px)');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const colors = tokens();
-  const isMobil = useMediaQuery('(max-width:600px)');
-  const {pathname} = useLocation();
   const { collapseSidebar, collapsed } = useProSidebar();
-  const [selected, setSelected] = useState('Dashboard');
+  const [selected, setSelected] = useState(pathname);
 
   const menuItemStyles = {
     // root: {
@@ -182,42 +181,42 @@ const Sidebar = () => {
 
             <Item
               title="Dashboard"
-              to="/dashboard"
+              path="/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Schedule"
-              to="/schedule"
+              path="/schedule"
               icon={<CalendarMonthIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Courses"
-              to="/courses"
+              path="/courses"
               icon={<AutoAwesomeMotionIcon />}
               selected={selected}
               setSelected={setSelected}                
             />
             <Item
               title="Events"
-              to="/events"
+              path="/events"
               icon={<EventIcon />}
               selected={selected}
               setSelected={setSelected}                
             />
             <Item
               title="Transactions"
-              to="/transactions"
+              path="/transactions"
               icon={<PaidIcon />}
               selected={selected}
               setSelected={setSelected}                
             />
             <Item
               title="Account"
-              to="/account"
+              path="/account"
               icon={<AccountCircleIcon />}
               selected={selected}
               setSelected={setSelected}                
@@ -238,13 +237,13 @@ const Sidebar = () => {
             >
               <Item
                 title="Evaluations"
-                to="/projects"
+                path="/projects"
                 selected={selected}
                 setSelected={setSelected}                
               />
               <Item
                 title="Classes"
-                to="/projects"
+                path="/projects"
                 selected={selected}
                 setSelected={setSelected}                
               />
@@ -259,14 +258,14 @@ const Sidebar = () => {
             </Typography>
             <Item
               title="Clients"
-              to="/clients"
+              path="/clients"
               icon={<ContactsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
               title="Manage Team"
-              to="/team"
+              path="/team"
               icon={<PeopleOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
